@@ -1,0 +1,11 @@
+-----------------------------------------------------
+               COMMERCIAL INVOICE REPORT             
+Garment Type:                 hoodie
+Order Quantity:               30 units
+Material Cost:                $20.00
+Retail Price:                 $50.00
+-----------------------------------------------------
+Gross Revenue:                $1500.00
+Total Production Cost:        $600.00
+Net Profit:                   $900.00
+-----------------------------------------------------

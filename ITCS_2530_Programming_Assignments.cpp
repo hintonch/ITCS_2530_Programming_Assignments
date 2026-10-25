@@ -1,61 +1,118 @@
 #include <iostream>
 #include <string>
+#include <iomanip>
+#include <fstream>
 
 using namespace std;
 
 int main()
 {
-    // Variables for user information and calculations
-    string garmentType;
-    int itemQuantity;
-    string customDetails;
-    double garmentPrice;
-    double embroideryFee;
-    double shippingCost;
-    double totalCost;
+	// Variables to track production costs and customer pricing
+	string garmentType;
+	int orderQuantity;
+	double materialCost = 0.0;
+	double retailPrice = 0.0;
+	double grossRevenue = 0.0;
+	double totalProductionCost = 0.0;
+	double netProfit = 0.0;
 
-    cout << "Welcome to the Custom Embroidery Ordering System!" << endl;
-    cout << "------------------------------------------------" << endl;
+	// Introdution Banner
+	cout << "-------------------------------------------------" << endl;
+	cout << "       EMBROIDERY APPAREL ECOMMERCE SYSTEM       " << endl;
+	cout << "-------------------------------------------------" << endl;
+	cout << "Calculate Production Costs and Customer Pricing for Embroidery Apparel" << endl;
 
-    // 1. Gather garment information
-    cout << "What type of garments do you like embroidered? (hoodies, tech fleece sets, joggers): ";
-    getline(cin, garmentType);
+	// Prompt user for garment type
+	cout << "Enter the garment type (e.g., T-shirt, Hoodie, Jacket): ";
+	cin >> garmentType;
 
-    // Prompt user for the corresponding base price to allow calculations without if-statements
-    cout << "Enter the price for your selection (hoodies=$50, tech fleece=$100, joggers=$30): $";
-    cin >> garmentPrice;
+	// Prompt user for order quantity
+	cout << "Enter the order quantity: ";
+	cin >> orderQuantity;
 
-    cout << "How many items would you like?: ";
-    cin >> itemQuantity;
-    cin.ignore(); // Clears the newline character so getline works next
+	// Input validation restore stream state and clear input buffer
+	bool qtyFailed = cin.fail() || orderQuantity <= 0;
+	qtyFailed ? cout << "Invalid input. Please enter a positive integer for order quantity." << endl : cout << "Order quantity accepted: " << orderQuantity << endl;
 
-    // 2. Gather custom design details
-    cout << "Is there any custom embroidery you would like to add?: ";
-    getline(cin, customDetails);
+	// Prompt user for material cost
+	cout << "Enter the material cost per garment: $";
+	cin >> materialCost;
 
-    cout << "Enter the embroidery fee (Enter 50 for custom embroidery, 0 for none): $";
-    cin >> embroideryFee;
-    cin.ignore();
+	// Input validation restore stream state and clear input buffer
+	bool costFailed = cin.fail() || materialCost <= 0.0;
+	costFailed ? (
+		cin.clear(),
+		cin.ignore(numeric_limits<streamsize>::max(), '\n'),
+		cout << "Invalid input. Please enter a positive number for material cost." << endl
+	) : cout << "Material cost accepted: $" << fixed << setprecision(2) << materialCost << endl;
 
-    // 3. Gather shipping preferences
-    string shippingSpeed;
-    cout << "How fast do you want your items shipped? (next day, 2 day, standard 5-7 days): ";
-    getline(cin, shippingSpeed);
+	// Prompt user for retail price
+	cout << "Enter the retail price per garment: $";
+	cin >> retailPrice;
 
-    cout << "Enter matching shipping cost (next day=$40, 2 day=$25, standard=$12): $";
-    cin >> shippingCost;
+	// Input validation restore stream state and clear input buffer
+	bool priceFailed = cin.fail() || retailPrice <= 0.0;
+	priceFailed ? cout << "Invalid input. Please enter a positive number for retail price." << endl : cout << "Retail price accepted: $" << fixed << setprecision(2) << retailPrice << endl;
 
-    // 4. Calculate total order balance
-    totalCost = (garmentPrice * itemQuantity) + embroideryFee + shippingCost;
+	// Input validation restore stream state and clear input buffer
+	//cin.clear();
+	//cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    // 5. Display the final summary paragraph
-    cout << endl;
-    cout << "Thank you for your order! You selected custom embroidered " << garmentType << " and requested " << itemQuantity << " item(s)." << endl;
-    cout << "For your design, you added: \"" << customDetails << "\"." << endl;
-    cout << "Your order will be sent via " << shippingSpeed << " shipping." << endl;
-    cout << "Based on your selections, your total calculated order balance comes out to: $" << totalCost << "." << endl;
-    cout << "We will begin stitching your custom items soon!" << endl;
+	// << "\nline 45:Entered garment type: " << garmentType << endl;
+	//cout << "line 46:Entered order quantity: " << orderQuantity << endl;
+	//cout << "line 47:Entered material cost: $" << fixed << setprecision(2) << materialCost << endl;
+	//cout << "line 48:Entered retail price: $" << fixed << setprecision(2) << retailPrice << endl;
+	
+	//cin >> garmentType >> orderQuantity >> materialCost >> retailPrice;
+	//cout << endl;
 
-    return 0;
+	// Data calculations
+	grossRevenue = retailPrice * orderQuantity;
+	totalProductionCost = materialCost * orderQuantity;
+	netProfit = grossRevenue - totalProductionCost;
+
+	// Output results
+	cout << endl;
+	cout << "-----------------------------------------------------" << endl;
+	cout << "               COMMERCIAL INVOICE REPORT             " << endl;
+	cout << "-----------------------------------------------------" << endl;
+	cout << left << setw(30) << "Garment Type: " << right << garmentType << endl;
+	cout << left << setw(30) << "Order Quantity: " << right << orderQuantity << " units" << endl;
+	cout << left << setw(30) << "Material Cost: " << right << "$" << fixed << setprecision(2) << materialCost << endl;
+	cout << left << setw(30) << "Retail Price: " << right << "$" << fixed << setprecision(2) << retailPrice << endl;
+	cout << "-----------------------------------------------------" << endl;
+	cout << left << setw(30) << "Gross Revenue: " << right << "$" << fixed << setprecision(2) << grossRevenue << endl;
+	cout << left << setw(30) << "Total Production Cost: " << right << "$" << fixed << setprecision(2) << totalProductionCost << endl;
+	cout << left << setw(30) << "Net Profit: " << right << "$" << fixed << setprecision(2) << netProfit << endl;
+	cout << "-----------------------------------------------------" << endl;
+
+	// Save results to a file
+	ofstream outFile("report.txt");
+
+	// Check if the file was opened successfully
+	if (!outFile) {
+		cout << "Error opening file for writing." << endl;
+		return 1;
+	}
+
+	// Write results to the file
+	outFile << "-----------------------------------------------------" << endl;
+	outFile << "               COMMERCIAL INVOICE REPORT             " << endl;
+	outFile << left << setw(30) << "Garment Type: " << right << garmentType << endl;
+	outFile << left << setw(30) << "Order Quantity: " << right << orderQuantity << " units" << endl;
+	outFile << left << setw(30) << "Material Cost: " << right << "$" << fixed << setprecision(2) << materialCost << endl;
+	outFile << left << setw(30) << "Retail Price: " << right << "$" << fixed << setprecision(2) << retailPrice << endl;
+	outFile << "-----------------------------------------------------" << endl;
+	outFile << left << setw(30) << "Gross Revenue: " << right << "$" << fixed << setprecision(2) << grossRevenue << endl;
+	outFile << left << setw(30) << "Total Production Cost: " << right << "$" << fixed << setprecision(2) << totalProductionCost << endl;
+	outFile << left << setw(30) << "Net Profit: " << right << "$" << fixed << setprecision(2) << netProfit << endl;
+	outFile << "-----------------------------------------------------" << endl;
+
+	// Close the file
+	outFile.close();
+	cout << "Report saved to report.txt" << endl;
+
+	return 0;
 }
-// Forgot to add commit message displayed on assignment
+
+
