@@ -1,11 +1,13 @@
 -----------------------------------------------------
                COMMERCIAL INVOICE REPORT             
-Garment Type:                 hoodie
-Order Quantity:               30 units
-Material Cost:                $20.00
-Retail Price:                 $50.00
+Garment Type:                 Tech Fleece Set
+Order Quantity:               120 units
+Material Cost:                $70.00
+Retail Price:                 $100.00
 -----------------------------------------------------
-Gross Revenue:                $1500.00
-Total Production Cost:        $600.00
-Net Profit:                   $900.00
+Gross Revenue:                $12000.00
+Bulk Discount:                -$360.00
+Total Production Cost:        $8400.00
+Net Profit:                   $3240.00
+Assigned Shipping Tier:       Express Priority Bulk
 -----------------------------------------------------
