@@ -1,13 +1,20 @@
 -----------------------------------------------------
                COMMERCIAL INVOICE REPORT             
-Garment Type:                 Tech Fleece Set
-Order Quantity:               120 units
-Material Cost:                $70.00
-Retail Price:                 $100.00
 -----------------------------------------------------
-Gross Revenue:                $12000.00
-Bulk Discount:                -$360.00
-Total Production Cost:        $8400.00
-Net Profit:                   $3240.00
+Garment Type:                 Hoodie
+Order Quantity:               120 units
+Material Cost:                $75.00
+Retail Price:                 $125.00
+-----------------------------------------------------
+Gross Revenue:                $15000.00
+Bulk Discount:                -$600.00
+Total Production Cost:        $9000.00
+Net Profit:                   $5400.00
 Assigned Shipping Tier:       Express Priority Bulk
+-----------------------------------------------------
+           3-MONTH RECURRING ORDER PROJECTION        
+-----------------------------------------------------
+Projected Profit Month   1: $5400.00
+Projected Profit Month   2: $10800.00
+Projected Profit Month   3: $16200.00
 -----------------------------------------------------

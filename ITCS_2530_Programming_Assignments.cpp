@@ -2,228 +2,369 @@
 #include <string>
 #include <iomanip>
 #include <fstream>
-#include <limits> 
+#include <windows.h>
 
 using namespace std;
 
+// Function prototypes
+void setColor(int color);
+void displayBanner();
+void displayMenu();
+string getValidGarment();
+int getValidQuantity();
+double getValidDollarAmount(string promptText);
+void collectOrderInput(string& garmentType, int& orderQuantity, double& materialCost, double& retailPrice);
+void calculateTotals(int orderQuantity, double materialCost, double retailPrice,
+    double& grossRevenue, double& totalProductionCost,
+    double& discount, double& discountAmount,
+    double& netProfit, string& shippingTier);
+void printInvoiceReport(string garmentType, int orderQuantity, double materialCost,
+    double retailPrice, double grossRevenue, double discountAmount,
+    double totalProductionCost, double netProfit, string shippingTier);
+void printShippingSummary(string garmentType, int orderQuantity, double totalProductionCost,
+    double discount, string shippingTier);
+void saveReportFile(string garmentType, int orderQuantity, double materialCost,
+    double retailPrice, double grossRevenue, double discountAmount,
+    double totalProductionCost, double netProfit, string shippingTier);
+
 int main()
 {
-	// Variables to track production costs and customer pricing
-	string garmentType;
-	int orderQuantity = 0;
-	double materialCost = 0.0;
-	double retailPrice = 0.0;
-	int menuChoice = 0;
-	double grossRevenue = 0.0;
-	double totalProductionCost = 0.0;
-	double netProfit = 0.0;
-	double discount = 0.0;
-	double discountAmount = 0.0; // Track actual dollar discount for the output report
-	string shippingTier = "Standard";
-	bool hasOrderData = false; // Track if user has entered order details yet
+    // Variables to track production costs and customer pricing
+    string garmentType = "";
+    int orderQuantity = 0;
+    double materialCost = 0.0;
+    double retailPrice = 0.0;
+    int menuChoice = 0;
 
-	// Repeat the menu until the user chooses to exit
-	do {
-		// Introdution Banner
-		cout << endl;
-		cout << "-------------------------------------------------" << endl;
-		cout << "       EMBROIDERY APPAREL ECOMMERCE SYSTEM       " << endl;
-		cout << "-------------------------------------------------" << endl;
-		cout << "1. Enter Order Details and Calculate Costs" << endl;
-		cout << "2. View Commercial Invoice Report" << endl;
-		cout << "3. View Assigned Shipping Tier & Discount Summary" << endl;
-		cout << "4. Exit Program" << endl;
-		cout << "Enter your choice (1-4): ";
-		cin >> menuChoice;
+    double grossRevenue = 0.0;
+    double totalProductionCost = 0.0;
+    double netProfit = 0.0;
+    double discount = 0.0;
+    double discountAmount = 0.0;
+    string shippingTier = "Standard";
+    bool orderEntered = false;
 
-		// Check if menu input failed
-		if (cin.fail()) {
-			cin.clear();
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
-			menuChoice = 0;
-		}
+    displayBanner();
 
-		// Handle menu selection
-		switch (menuChoice) {
-		case 1:
-			cout << "You selected option 1: Enter Order Details and Calculate Costs" << endl;
-			// Clear the input buffer newline so getline works correctly next
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    // Keep showing the menu until the user selects 4 to exit
+    do {
+        displayMenu();
+        cin >> menuChoice;
 
-			// Prompt user for garment type 
-			cout << "Enter the garment type (e.g., T-shirt, Hoodie, Jacket, Tech Fleece Set): ";
-			getline(cin, garmentType);
+        // Check if user typed letters instead of a number
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            menuChoice = 0;
+        }
+        else {
+            cin.ignore(1000, '\n');
+        }
 
-			// Prompt user for order quantity and validate with while loop
-			cout << "Enter the order quantity: ";
-			cin >> orderQuantity;
+        switch (menuChoice) {
+        case 1:
+            setColor(11);
+            cout << "\nYou selected Option 1: Enter Order Details and Calculate Costs" << endl;
+            setColor(7);
 
-			while (cin.fail() || orderQuantity <= 0) {
-				cin.clear();
-				cin.ignore(numeric_limits<streamsize>::max(), '\n');
-				cout << "Invalid input. Please enter a positive integer for order quantity: ";
-				cin >> orderQuantity;
-			}
-			cout << "Order quantity accepted: " << orderQuantity << endl;
+            collectOrderInput(garmentType, orderQuantity, materialCost, retailPrice);
 
-			// Prompt user for material cost and validate with while loop
-			cout << "Enter the material cost per garment: $";
-			cin >> materialCost;
+            calculateTotals(orderQuantity, materialCost, retailPrice,
+                grossRevenue, totalProductionCost,
+                discount, discountAmount, netProfit, shippingTier);
 
-			while (cin.fail() || materialCost <= 0.0) {
-				cin.clear();
-				cin.ignore(numeric_limits<streamsize>::max(), '\n');
-				cout << "Invalid input. Please enter a positive number for material cost: $";
-				cin >> materialCost;
-			}
-			cout << "Material cost accepted: $" << fixed << setprecision(2) << materialCost << endl;
+            orderEntered = true;
+            setColor(10);
+            cout << "\nOrder calculations complete! Select Option 2 or 3 from the menu to view reports." << endl;
+            setColor(7);
+            break;
 
-			// Prompt user for retail price and validate with while loop
-			cout << "Enter the retail price per garment: $";
-			cin >> retailPrice;
+        case 2:
+            if (!orderEntered) {
+                setColor(14);
+                cout << "\nNo order data found. Please select Option 1 first to enter order details." << endl;
+                setColor(7);
+            }
+            else {
+                printInvoiceReport(garmentType, orderQuantity, materialCost,
+                    retailPrice, grossRevenue, discountAmount,
+                    totalProductionCost, netProfit, shippingTier);
 
-			while (cin.fail() || retailPrice <= 0.0) {
-				cin.clear();
-				cin.ignore(numeric_limits<streamsize>::max(), '\n');
-				cout << "Invalid input. Please enter a positive number for retail price: $";
-				cin >> retailPrice;
-			}
-			cout << "Retail price accepted: $" << fixed << setprecision(2) << retailPrice << endl;
+                saveReportFile(garmentType, orderQuantity, materialCost,
+                    retailPrice, grossRevenue, discountAmount,
+                    totalProductionCost, netProfit, shippingTier);
+            }
+            break;
 
-			// Data calculations
-			grossRevenue = retailPrice * orderQuantity;
-			totalProductionCost = materialCost * orderQuantity;
-			netProfit = grossRevenue - totalProductionCost;
+        case 3:
+            if (!orderEntered) {
+                setColor(14);
+                cout << "\nNo order data found. Please select Option 1 first to enter order details." << endl;
+                setColor(7);
+            }
+            else {
+                printShippingSummary(garmentType, orderQuantity, totalProductionCost,
+                    discount, shippingTier);
+            }
+            break;
 
-			// Apply discount based on order quantity
-			if (orderQuantity >= 100) {
-				discount = 0.10;
-				discountAmount = netProfit * discount;
-				netProfit -= discountAmount;
-			}
-			else if (orderQuantity >= 50) {
-				discount = 0.05;
-				discountAmount = netProfit * discount;
-				netProfit -= discountAmount;
-			}
-			else {
-				discount = 0.0;
-				discountAmount = 0.0;
-			}
+        case 4:
+            setColor(11);
+            cout << "\nThank you for using the Embroidery Apparel Ecommerce System. Goodbye!" << endl;
+            setColor(7);
+            break;
 
-			// Shipping tiers based on quantity and production cost
-			if (orderQuantity >= 100 && totalProductionCost >= 2000.0) {
-				shippingTier = "Express Priority Bulk";
-			}
-			else if (orderQuantity < 100 && totalProductionCost > 500.0) {
-				shippingTier = "Standard Premium Handling";
-			}
-			else {
-				shippingTier = "Basic Economy Ground";
-			}
+        default:
+            setColor(12);
+            cout << "\nInvalid choice. Please enter a number between 1 and 4." << endl;
+            setColor(7);
+            break;
+        }
 
-			hasOrderData = true;
-			cout << "\nOrder calculations complete! Select Option 2 or 3 from the menu to view reports." << endl;
-			break;
+    } while (menuChoice != 4);
 
-		case 2:
-			if (!hasOrderData) {
-				cout << "\nNo order data found. Please select Option 1 first to enter order details." << endl;
-			}
-			else {
-				// Output results
-				cout << endl;
-				cout << "-----------------------------------------------------" << endl;
-				cout << "               COMMERCIAL INVOICE REPORT             " << endl;
-				cout << "-----------------------------------------------------" << endl;
-				cout << left << setw(30) << "Garment Type: " << right << garmentType << endl;
-				cout << left << setw(30) << "Order Quantity: " << right << orderQuantity << " units" << endl;
-				cout << left << setw(30) << "Material Cost: " << right << "$" << fixed << setprecision(2) << materialCost << endl;
-				cout << left << setw(30) << "Retail Price: " << right << "$" << fixed << setprecision(2) << retailPrice << endl;
-				cout << "-----------------------------------------------------" << endl;
-				cout << left << setw(30) << "Gross Revenue: " << right << "$" << fixed << setprecision(2) << grossRevenue << endl;
-				cout << left << setw(30) << "Bulk Discount: " << right << "-$" << fixed << setprecision(2) << discountAmount << endl;
-				cout << left << setw(30) << "Total Production Cost: " << right << "$" << fixed << setprecision(2) << totalProductionCost << endl;
-				cout << left << setw(30) << "Net Profit: " << right << "$" << fixed << setprecision(2) << netProfit << endl;
-				cout << left << setw(30) << "Assigned Shipping Tier: " << right << shippingTier << endl;
-				cout << "-----------------------------------------------------" << endl;
-
-				// Show 3-month recurring profit projection 
-				cout << "-----------------------------------------------------" << endl;
-				cout << "           3-MONTH RECURRING ORDER PROJECTION        " << endl;
-				cout << "-----------------------------------------------------" << endl;
-				for (int month = 1; month <= 3; month++) {
-					cout << left << setw(25) << "Projected Profit Month " << month << ": "
-						<< right << "$" << fixed << setprecision(2) << (netProfit * month) << endl;
-				}
-				cout << "-----------------------------------------------------" << endl;
-
-				// Save results to a file
-				ofstream outFile("report.txt");
-
-				// Check if the file was opened successfully
-				if (!outFile) {
-					cout << "Error opening file for writing." << endl;
-					return 1;
-				}
-
-				// Write results to the file
-				outFile << "-----------------------------------------------------" << endl;
-				outFile << "               COMMERCIAL INVOICE REPORT             " << endl;
-				outFile << "-----------------------------------------------------" << endl;
-				outFile << left << setw(30) << "Garment Type: " << right << garmentType << endl;
-				outFile << left << setw(30) << "Order Quantity: " << right << orderQuantity << " units" << endl;
-				outFile << left << setw(30) << "Material Cost: " << right << "$" << fixed << setprecision(2) << materialCost << endl;
-				outFile << left << setw(30) << "Retail Price: " << right << "$" << fixed << setprecision(2) << retailPrice << endl;
-				outFile << "-----------------------------------------------------" << endl;
-				outFile << left << setw(30) << "Gross Revenue: " << right << "$" << fixed << setprecision(2) << grossRevenue << endl;
-				outFile << left << setw(30) << "Bulk Discount: " << right << "-$" << fixed << setprecision(2) << discountAmount << endl;
-				outFile << left << setw(30) << "Total Production Cost: " << right << "$" << fixed << setprecision(2) << totalProductionCost << endl;
-				outFile << left << setw(30) << "Net Profit: " << right << "$" << fixed << setprecision(2) << netProfit << endl;
-				outFile << left << setw(30) << "Assigned Shipping Tier: " << right << shippingTier << endl;
-				outFile << "-----------------------------------------------------" << endl;
-				outFile << "           3-MONTH RECURRING ORDER PROJECTION        " << endl;
-				outFile << "-----------------------------------------------------" << endl;
-				for (int month = 1; month <= 3; month++) {
-					outFile << left << setw(25) << "Projected Profit Month " << month << ": "
-						<< right << "$" << fixed << setprecision(2) << (netProfit * month) << endl;
-				}
-				outFile << "-----------------------------------------------------" << endl;
-
-				// Close the file
-				outFile.close();
-				cout << "Report saved to report.txt" << endl;
-			}
-			break;
-
-		case 3:
-			if (!hasOrderData) {
-				cout << "\nNo order data found. Please select Option 1 first to enter order details." << endl;
-			}
-			else {
-				cout << endl;
-				cout << "-----------------------------------------------------" << endl;
-				cout << "        SHIPPING TIER & BULK DISCOUNT SUMMARY        " << endl;
-				cout << "-----------------------------------------------------" << endl;
-				cout << left << setw(30) << "Garment Type: " << right << garmentType << endl;
-				cout << left << setw(30) << "Order Quantity: " << right << orderQuantity << " units" << endl;
-				cout << left << setw(30) << "Total Production Cost: " << right << "$" << fixed << setprecision(2) << totalProductionCost << endl;
-				cout << left << setw(30) << "Applied Bulk Discount: " << right << fixed << setprecision(0) << (discount * 100) << "%" << endl;
-				cout << left << setw(30) << "Assigned Shipping Tier: " << right << shippingTier << endl;
-				cout << "-----------------------------------------------------" << endl;
-			}
-			break;
-
-		case 4:
-			cout << "You selected option 4: Exit Program" << endl;
-			break;
-
-		default:
-			cout << "Invalid choice. Please enter a number between 1 and 4." << endl;
-			break;
-		}
-
-	} while (menuChoice != 4);
-
-	return 0;
+    return 0;
 }
+
+// Changes console text color on Windows (7 = white, 10 = green, 11 = cyan, 12 = red, 14 = yellow)
+void setColor(int color)
+{
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, color);
+}
+
+// Displays welcome banner
+void displayBanner()
+{
+    setColor(11);
+    cout << "=====================================================" << endl;
+    cout << "                EMBROIDERY APPAREL SYSTEM            " << endl;
+    cout << "    Custom Production, Pricing & Profit Estimator    " << endl;
+    cout << "=====================================================" << endl;
+    setColor(7);
+}
+
+// Displays the main menu
+void displayMenu()
+{
+    setColor(11);
+    cout << endl;
+    cout << "-----------------------------------------------------" << endl;
+    cout << "                      MAIN MENU                      " << endl;
+    cout << "-----------------------------------------------------" << endl;
+    setColor(7);
+    cout << "1. Enter Order Details and Calculate Costs" << endl;
+    cout << "2. View Commercial Invoice Report & Save File" << endl;
+    cout << "3. View Assigned Shipping Tier & Discount Summary" << endl;
+    cout << "4. Exit Program" << endl;
+    setColor(14);
+    cout << "Enter your choice (1-4): ";
+    setColor(7);
+}
+
+// Gets and validates a non-empty garment name
+string getValidGarment()
+{
+    string garment = "";
+    cout << "Enter the garment type (e.g., T-shirt, Hoodie, Tech Fleece Set): ";
+    getline(cin, garment);
+
+    while (garment == "") {
+        setColor(12);
+        cout << "Invalid input. Garment type cannot be blank. Please enter again: ";
+        setColor(7);
+        getline(cin, garment);
+    }
+
+    return garment;
+}
+
+// Gets and validates a positive whole number for quantity
+int getValidQuantity()
+{
+    int qty = 0;
+    cout << "Enter the order quantity: ";
+    cin >> qty;
+
+    while (cin.fail() || qty <= 0) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        setColor(12);
+        cout << "Invalid input. Please enter a positive whole number: ";
+        setColor(7);
+        cin >> qty;
+    }
+
+    cin.ignore(1000, '\n');
+    return qty;
+}
+
+// Gets and validates a positive dollar amount
+double getValidDollarAmount(string promptText)
+{
+    double amount = 0.0;
+    cout << promptText;
+    cin >> amount;
+
+    while (cin.fail() || amount <= 0.0) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        setColor(12);
+        cout << "Invalid input. Please enter a positive dollar amount: $";
+        setColor(7);
+        cin >> amount;
+    }
+
+    cin.ignore(1000, '\n');
+    return amount;
+}
+
+// Collects all inputs from the user
+void collectOrderInput(string& garmentType, int& orderQuantity, double& materialCost, double& retailPrice)
+{
+    garmentType = getValidGarment();
+
+    orderQuantity = getValidQuantity();
+    setColor(10);
+    cout << "Order quantity accepted: " << orderQuantity << endl;
+    setColor(7);
+
+    materialCost = getValidDollarAmount("Enter the material cost per garment: $");
+    setColor(10);
+    cout << "Material cost accepted: $" << fixed << setprecision(2) << materialCost << endl;
+    setColor(7);
+
+    retailPrice = getValidDollarAmount("Enter the retail price per garment: $");
+    setColor(10);
+    cout << "Retail price accepted: $" << fixed << setprecision(2) << retailPrice << endl;
+    setColor(7);
+}
+
+// Calculates revenue, bulk discount, net profit, and shipping tier
+void calculateTotals(int orderQuantity, double materialCost, double retailPrice,
+    double& grossRevenue, double& totalProductionCost,
+    double& discount, double& discountAmount,
+    double& netProfit, string& shippingTier)
+{
+    grossRevenue = retailPrice * orderQuantity;
+    totalProductionCost = materialCost * orderQuantity;
+    netProfit = grossRevenue - totalProductionCost;
+
+    // Bulk discount rules
+    if (orderQuantity >= 100) {
+        discount = 0.10;
+        discountAmount = netProfit * discount;
+        netProfit -= discountAmount;
+    }
+    else if (orderQuantity >= 50) {
+        discount = 0.05;
+        discountAmount = netProfit * discount;
+        netProfit -= discountAmount;
+    }
+    else {
+        discount = 0.0;
+        discountAmount = 0.0;
+    }
+
+    // Shipping tier rules using compound boolean conditions
+    if (orderQuantity >= 100 && totalProductionCost >= 2000.0) {
+        shippingTier = "Express Priority Bulk";
+    }
+    else if (orderQuantity < 100 && totalProductionCost > 500.0) {
+        shippingTier = "Standard Premium Handling";
+    }
+    else {
+        shippingTier = "Basic Economy Ground";
+    }
+}
+
+// Displays the full invoice report and 3-month projection
+void printInvoiceReport(string garmentType, int orderQuantity, double materialCost,
+    double retailPrice, double grossRevenue, double discountAmount,
+    double totalProductionCost, double netProfit, string shippingTier)
+{
+    setColor(11);
+    cout << endl;
+    cout << "-----------------------------------------------------" << endl;
+    cout << "               COMMERCIAL INVOICE REPORT             " << endl;
+    cout << "-----------------------------------------------------" << endl;
+    setColor(7);
+
+    cout << left << setw(30) << "Garment Type: " << right << garmentType << endl;
+    cout << left << setw(30) << "Order Quantity: " << right << orderQuantity << " units" << endl;
+    cout << left << setw(30) << "Material Cost: " << right << "$" << fixed << setprecision(2) << materialCost << endl;
+    cout << left << setw(30) << "Retail Price: " << right << "$" << fixed << setprecision(2) << retailPrice << endl;
+    cout << "-----------------------------------------------------" << endl;
+    cout << left << setw(30) << "Gross Revenue: " << right << "$" << fixed << setprecision(2) << grossRevenue << endl;
+    cout << left << setw(30) << "Bulk Discount: " << right << "-$" << fixed << setprecision(2) << discountAmount << endl;
+    cout << left << setw(30) << "Total Production Cost: " << right << "$" << fixed << setprecision(2) << totalProductionCost << endl;
+    setColor(10);
+    cout << left << setw(30) << "Net Profit: " << right << "$" << fixed << setprecision(2) << netProfit << endl;
+    setColor(7);
+    cout << left << setw(30) << "Assigned Shipping Tier: " << right << shippingTier << endl;
+    setColor(11);
+    cout << "-----------------------------------------------------" << endl;
+    cout << "           3-MONTH RECURRING ORDER PROJECTION        " << endl;
+    cout << "-----------------------------------------------------" << endl;
+    setColor(7);
+    for (int month = 1; month <= 3; month++) {
+	    cout << left << setw(25) << "Projected Profit Month " << month << ": "
+		    << right << "$" << fixed << setprecision(2) << (netProfit * month) << endl;
+    }
+    cout << "-----------------------------------------------------" << endl;
+    }
+    // Displays shipping tier and discount breakdown
+    void printShippingSummary(string garmentType, int orderQuantity, double totalProductionCost,
+	    double discount, string shippingTier)
+    {
+	    setColor(11);
+	    cout << endl;
+	    cout << "-----------------------------------------------------" << endl;
+	    cout << "        SHIPPING TIER & BULK DISCOUNT SUMMARY        " << endl;
+	    cout << "-----------------------------------------------------" << endl;
+	    setColor(7);
+	    cout << left << setw(30) << "Garment Type: " << right << garmentType << endl;
+	    cout << left << setw(30) << "Order Quantity: " << right << orderQuantity << " units" << endl;
+	    cout << left << setw(30) << "Total Production Cost: " << right << "$" << fixed << setprecision(2) << totalProductionCost << endl;
+	    cout << left << setw(30) << "Applied Bulk Discount: " << right << fixed << setprecision(0) << (discount * 100) << "%" << endl;
+	    cout << left << setw(30) << "Assigned Shipping Tier: " << right << shippingTier << endl;
+	    cout << "-----------------------------------------------------" << endl;
+    }
+    // Saves the invoice report to report.txt
+    void saveReportFile(string garmentType, int orderQuantity, double materialCost,
+	    double retailPrice, double grossRevenue, double discountAmount,
+	    double totalProductionCost, double netProfit, string shippingTier)
+    {
+	    ofstream outFile("report.txt");
+	    if (!outFile) {
+		    setColor(12);
+		    cout << "Error opening report.txt for writing." << endl;
+		    setColor(7);
+		    return;
+	    }
+	    outFile << "-----------------------------------------------------" << endl;
+	    outFile << "               COMMERCIAL INVOICE REPORT             " << endl;
+	    outFile << "-----------------------------------------------------" << endl;
+	    outFile << left << setw(30) << "Garment Type: " << right << garmentType << endl;
+	    outFile << left << setw(30) << "Order Quantity: " << right << orderQuantity << " units" << endl;
+	    outFile << left << setw(30) << "Material Cost: " << right << "$" << fixed << setprecision(2) << materialCost << endl;
+	    outFile << left << setw(30) << "Retail Price: " << right << "$" << fixed << setprecision(2) << retailPrice << endl;
+	    outFile << "-----------------------------------------------------" << endl;
+	    outFile << left << setw(30) << "Gross Revenue: " << right << "$" << fixed << setprecision(2) << grossRevenue << endl;
+	    outFile << left << setw(30) << "Bulk Discount: " << right << "-$" << fixed << setprecision(2) << discountAmount << endl;
+	    outFile << left << setw(30) << "Total Production Cost: " << right << "$" << fixed << setprecision(2) << totalProductionCost << endl;
+	    outFile << left << setw(30) << "Net Profit: " << right << "$" << fixed << setprecision(2) << netProfit << endl;
+	    outFile << left << setw(30) << "Assigned Shipping Tier: " << right << shippingTier << endl;
+	    outFile << "-----------------------------------------------------" << endl;
+	    outFile << "           3-MONTH RECURRING ORDER PROJECTION        " << endl;
+	    outFile << "-----------------------------------------------------" << endl;
+	    for (int month = 1; month <= 3; month++) {
+		    outFile << left << setw(25) << "Projected Profit Month " << month << ": "
+			    << right << "$" << fixed << setprecision(2) << (netProfit * month) << endl;
+	    }
+	    outFile << "-----------------------------------------------------" << endl;
+	    outFile.close();
+	    setColor(10);
+	    cout << "Report successfully saved to report.txt" << endl;
+	    setColor(7);
+    }
